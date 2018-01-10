@@ -1,0 +1,10 @@
+cat /data/joy/BBL/projects/enigmaAnxiety/subjectData/n690_enigmaAnx_bblids.csv
+paste -s -d : /data/joy/BBL/projects/enigmaAnxiety/subjectData/n690_enigmaAnx_bblids.csv
+GLOBIGNORE=$(paste -s -d : /data/joy/BBL/projects/enigmaAnxiety/subjectData/n690_enigmaAnx_bblids.csv)
+rm -r -- *
+
+cat list.csv
+paste -s -d : list.csv
+GLOBIGNORE=$(paste -s -d : list.csv)
+rm -r -- *
+
