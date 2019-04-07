@@ -144,7 +144,8 @@ subjData$Sph[which(subjData$goassessSmryPhb==4)] <- 1
 #Typically Developing
 dxNames <- c("bblid","Add","Agr","Ano","Bul","Con","Gad","Man","Mdd","Ocd","Odd","Pan","Ps","Ptd","Sep","Soc","Sph")
 dxDf <- data.matrix(subjData[,dxNames])
-subjData$totDx <- rowSums(dxDf[,2:17], na.rm=TRUE) #This is how many people have how many diagnoses: sum(subjData$totDx==0):420, sum(subjData$totDx==1):316, sum(subjData$totDx>=2):648
+#This is how many people have how many diagnoses: sum(subjData$totDx==0):420, sum(subjData$totDx==1):316, sum(subjData$totDx>=2):648
+subjData$totDx <- rowSums(dxDf[,2:17], na.rm=TRUE)
 subjData$Td <- 0
 subjData$Td[which(subjData$totDx==0)] <- 1
 
@@ -175,21 +176,25 @@ subjData$Sph[which(subjData$Td==1)] <- 0
 ### SUBSET TO THOSE WITH ANXIETY DIAGNOSES ###
 ##############################################
 
-#Create a variable that represents only the anxiety groups
+#Create a variable that represents only the anxiety groups and the TD youth
 subjData$AllAnxTd <- NA
-subjData$AllAnxTd[subjData$Agr==1] <- "AllAnx"
-subjData$AllAnxTd[subjData$Gad==1] <- "AllAnx"
-subjData$AllAnxTd[subjData$Ocd==1] <- "AllAnx"
-subjData$AllAnxTd[subjData$Pan==1] <- "AllAnx"
-subjData$AllAnxTd[subjData$Ptd==1] <- "AllAnx"
-subjData$AllAnxTd[subjData$Sep==1] <- "AllAnx"
-subjData$AllAnxTd[subjData$Soc==1] <- "AllAnx"
-subjData$AllAnxTd[subjData$Sph==1] <- "AllAnx"
+subjData$AllAnxTd[subjData$Agr==1] <- "Anx"
+subjData$AllAnxTd[subjData$Gad==1] <- "Anx"
+subjData$AllAnxTd[subjData$Ocd==1] <- "Anx"
+subjData$AllAnxTd[subjData$Pan==1] <- "Anx"
+subjData$AllAnxTd[subjData$Ptd==1] <- "Anx"
+subjData$AllAnxTd[subjData$Sep==1] <- "Anx"
+subjData$AllAnxTd[subjData$Soc==1] <- "Anx"
+subjData$AllAnxTd[subjData$Sph==1] <- "Anx"
+subjData$AllAnxTd[subjData$Td==1] <- "TD"
 subjData$AllAnxTd <- as.factor(subjData$AllAnxTd)
 
-#Subset to just the anxiety groups (n=690)
-AllAnxSubjData <- subjData
-AllAnxSubjData <- AllAnxSubjData[which(AllAnxSubjData$AllAnx != "NA"), ]
+#Subset to just the anxiety groups and the TD (n=1110)
+AllAnxTdSubjData <- subjData
+AllAnxTdSubjData <- AllAnxTdSubjData[which(AllAnxTdSubjData$AllAnxTd != "NA"), ]
+
+#See n's by group (Anx=690; TD=420)
+nAllAnxTd <- table(subjData$AllAnxTd)
 
 
 ######################################
@@ -197,29 +202,30 @@ AllAnxSubjData <- AllAnxSubjData[which(AllAnxSubjData$AllAnx != "NA"), ]
 ######################################
 
 #Frequencies of each comorbid disorder
-Add_freq <- sum(AllAnxSubjData$Add, na.rm=TRUE)
-Ano_freq <- sum(AllAnxSubjData$Ano, na.rm=TRUE)
-Bul_freq <- sum(AllAnxSubjData$Bul, na.rm=TRUE)
-Con_freq <- sum(AllAnxSubjData$Con, na.rm=TRUE)
-Mdd_freq <- sum(AllAnxSubjData$Mdd, na.rm=TRUE)
-Man_freq <- sum(AllAnxSubjData$Man, na.rm=TRUE)
-Odd_freq <- sum(AllAnxSubjData$Odd, na.rm=TRUE)
-Ps_freq <- sum(AllAnxSubjData$Ps, na.rm=TRUE)
+Add_freq <- sum(AllAnxTdSubjData$Add, na.rm=TRUE)
+Ano_freq <- sum(AllAnxTdSubjData$Ano, na.rm=TRUE)
+Bul_freq <- sum(AllAnxTdSubjData$Bul, na.rm=TRUE)
+Con_freq <- sum(AllAnxTdSubjData$Con, na.rm=TRUE)
+Mdd_freq <- sum(AllAnxTdSubjData$Mdd, na.rm=TRUE)
+Man_freq <- sum(AllAnxTdSubjData$Man, na.rm=TRUE)
+Odd_freq <- sum(AllAnxTdSubjData$Odd, na.rm=TRUE)
+Ps_freq <- sum(AllAnxTdSubjData$Ps, na.rm=TRUE)
 
 #Determine how many of the anxiety subjects have more than 1 diagnosis (1 diagnosis = 164; 2 or more diagnoses = 526)
-oneDx <- sum(AllAnxSubjData$totDx==1)
-twoOrMoreDx <- sum(AllAnxSubjData$totDx>=2)
+oneDx <- sum(AllAnxTdSubjData$totDx==1)
+twoOrMoreDx <- sum(AllAnxTdSubjData$totDx>=2)
 
 #Determine how many subjects were on psychiatric meds at the time of imaging
-subjData_sensitivity <- AllAnxSubjData
+subjData_sensitivity <- AllAnxTdSubjData
 subjData_sensitivity$ACROSS.INCLUDE.PSYCMEDS <- 1
 subjData_sensitivity$ACROSS.INCLUDE.PSYCMEDS[subjData_sensitivity$psychoactiveMedPsychv2==1] <- 0
 NoMeds <- sum(subjData_sensitivity$ACROSS.INCLUDE.PSYCMEDS)
-Meds <- 690-NoMeds
+#N on meds = 100
+Meds <- 1110-NoMeds
 
 #Mean age and range
-meanAge<-mean(AllAnxSubjData$age)
-rangeAge<-range(AllAnxSubjData$age)
+meanAge<-mean(AllAnxTdSubjData$age)
+rangeAge<-range(AllAnxTdSubjData$age)
 
 
 #################
@@ -227,22 +233,24 @@ rangeAge<-range(AllAnxSubjData$age)
 #################
 
 #Save RDS file with all variables
-saveRDS(AllAnxSubjData,"/data/joy/BBL/projects/enigmaAnxiety/subjectData/n690_enigmaAnx_subjData.rds")
+saveRDS(AllAnxTdSubjData,"/data/jux/BBL/studies/enigmaAnxiety/subjectData/n1110_enigmaAnx_subjData.rds")
 
 #Save the .csv with just the bblids and scanids
 IDs <- c("bblid", "scanid")
-bblidsScanids <- AllAnxSubjData[IDs]
+bblidsScanids <- AllAnxTdSubjData[IDs]
 
 #Remove header
 names(bblidsScanids) <- NULL
 
 #Save list
-write.csv(bblidsScanids, file="/data/joy/BBL/projects/enigmaAnxiety/subjectData/n690_enigmaAnx_bblids_scanids.csv", row.names=FALSE)
+write.csv(bblidsScanids, file="/data/jux/BBL/studies/enigmaAnxiety/subjectData/n1110_enigmaAnx_bblids_scanids.csv", row.names=FALSE)
 
 
 ######################################
 ### SUBSET TO THOSE UNDER 18 YEARS ###
 ######################################
+
+#This was just done to give the ENIGMA anixety people a sense of how many subjects were under 18 years (analyses will use the entire age range). 
 
 #Create under 21 inclusion variable (for ENIGMA-ANXIETY sample sizes)
 subjData_under21 <- subjData
@@ -252,7 +260,7 @@ subjData_under21$ACROSS.INCLUDE.UNDER21[subjData_under21$age<21] <- 1
 #Subset the data to just those under 21
 subjData_under21 <- subjData_under21[which(subjData_under21$ACROSS.INCLUDE.UNDER21 != "NA"), ]
 
-#Calculate n per anixety group
+#Calculate n per anxiety group
 
 #Agoraphobia
 nAgr<-sum(subjData_under21$Agr, na.rm=TRUE)
@@ -281,7 +289,7 @@ nSph<-sum(subjData_under21$Sph, na.rm=TRUE)
 #Typically Developing
 nTd<-sum(subjData_under21$Td, na.rm=TRUE)
 
-#Determine number of subjects with any anxiety diagnosis (n=)
+#Determine number of subjects with any anxiety diagnosis
 nAllAnx <- table(subjData_under21$AllAnxTd)
 
 
@@ -487,5 +495,5 @@ table1[,6]<-meduMeanComb
 table1[,7]<-meduSdComb
 
 #Save table
-write.csv(table1,"/data/joy/BBL/projects/enigmaAnxiety/tablesFigures/Table1_Demographics.csv",row.names=TRUE,quote=FALSE)
+write.csv(table1,"/data/jux/BBL/studies/enigmaAnxiety/tablesFigures/Table1_Demographics.csv",row.names=TRUE,quote=FALSE)
 

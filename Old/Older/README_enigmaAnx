@@ -1,0 +1,106 @@
+################################
+#### ENIGMA ANXIETY projects ###
+################################
+
+1. Panic (n=14) vs. TD 
+   a. subcortical (project ongoing)
+
+2. SAD (n=325) vs. TD
+   a. subcortical (other sites are aiming to finish QA in Feb 2018)
+   b. cortical (ETA: "much later in 2018")
+
+3. Specific Phobia (n=424) vs. TD
+   a. subcortical? (proposal received, no concrete plans yet)
+
+4. GAD (n=27) vs. TD
+   a. subcortical (starting "soon")
+
+
+##NOTES:
+#This README file is a supplement to the "Instructions Freesurfer subcortical segmentation" document provided by Moji Aghajani (m.aghajani@vumc.nl) and Nynke Groenewold (nynke.groenewold@uct.ac.za).
+#Comorbidity is okay across anxiety diagnoses (subjects can be in more than one anxiety category).
+
+
+###############
+#### STEPS ####
+###############
+
+1. Run "recon-all" in freesurfer (steps 1-3 in "Instructions Freesurfer subcortical segmentation" were skipped).
+   a. All PNC data (n=1601) was run through the recon-all freesurfer pipeline by Megan Quarmely and Lauren Beard.
+   b. The directory for the freesurfer results is here: /data/joy/BBL/studies/pnc/processedData/structural/freesurfer53
+
+2. Run the script "DataPrep.R" which will:
+   a. Load the data files
+   b. Merge the files
+   c. Apply exclusions
+   d. Transform variables	
+   e. Make diagnosis factor variables (1=patient, 0=TD)
+   f. Subset to only TD and those with an anxiety diagnosis (anxiety=690, TD=420, total=1110)
+   g. Describe the sample in terms of comorbidities, med use, mean age, etc.
+   h. Save the subject level data file and a .csv of the bblids/scanids of the final 1110 sample
+   i. Subset the 1601 data to those under 18 to document samples sizes under 18 (just for the ENIGMA group's knowledge; analyses include all age ranges)
+   j. Calculate means, sds, percentage of females, percentage of White, and Ns for entire 1601 sample
+   k. Create and save a demographics table for the n1601 sample
+
+3. Extract subcortical volumes
+   a. Step 4 in the "Instructions Freesurfer subcortical segmentation" document was skipped because we already extracted the subcortical volume values for all subjects for previous ENIGMA projects.
+   b. Instead, use the script "PullSubcortValues.R" which will:
+      1. Read in and merge the subject level and volume data
+      2. Extract the bblids and datexscanids for the script "MoveDirUp.sh" (step 5b)
+      3. Pull the subcortical values for just the subjects we need for the ENIGMA Anxiety histograms
+      4. Rename the variables to match the "enigma_plots.R" script provided by the ENIGMA working group
+      5. Save the full n=1110 sample LandRvolumes.csv
+      6. Subset by each group (panic, social anxiety, GAD, specific phobia, and TD) and save each LandRvolumes.csv file in a separate folder (before QA or after???)
+
+4. Generate histogram plots (for detecting outliers)
+   a. Use the script "enigma_plots.R" to generate the histograms 
+      1. Copy enigma_plots.R into /data/jux/BBL/studies/enigmaAnxiety/figures/all
+      2. To run the script, cd to that folder and type:
+      	 R --no-save --slave < enigma_plots.R
+   b. Use the script "outlier_LandRvolumes.R" to generate a log file that will tell you which subjects are outliers.
+      1. Copy outlier_LandRvolumes.R into /data/jux/BBL/studies/enigmaAnxiety/figures/all
+      2. Cd to that folder and type:
+      	 R --no-save --slave < outlier_LandRvolumes.R > outliers.log
+
+5. Copy the data files from /data/joy/BBL/studies/pnc/processedData/structural/freesurfer53 to /data/jux/BBL/studies/enigmaAnxiety/SUBJECTDATA/freesurfer53
+   a. Use the script "CopyData.R"
+      1. Once copied, count the number of directories in a folder to make sure all files copied over: ls -1 |wc -l
+   b. Use the script "MoveDirUp.sh" which will: 
+      1. Move the 'mri' folder one directory up from {bblid}/{date}/mri to {bblid}/mri
+	 NOTE: This is done because we have to change the directory levels in order for the matlab script to create pngs for quality checking.  
+
+6. Create pngs for the quality check
+   a. Use the following procedure (otherwise, you will get errors about "crash dumps" because of too little memory)
+      	  ssh -Y username
+	  screen -S enigmaAnxiety
+	  qlogin	
+	  cd /data/jux/BBL/studies/enigmaAnxiety/SUBJECTDATA/freesurfer53
+	  matlab -nodisplay
+	  addpath /data/jux/BBL/studies/enigmaAnxiety/scripts/ENIGMA_QC
+
+
+
+{SOPHIA TO UPDATE}
+QC_output_directory='/data/joy/BBL/projects/enigmaAnxiety/SUBJECTDATA/freesurfer53/QC/';
+FS_directory='/data/joy/BBL/projects/enigmaAnxiety/SUBJECTDATA/freesurfer53';
+a=dir(char(strcat(FS_directory,'/*')));%Choose this so that it selects only %your subject folders that contain FS output
+for x = 1:size(a,1)
+[c,b,d]=fileparts(a(x,1).name); %b becomes the subject_name
+try
+func_make_subcorticalFS_ENIGMA_QC(QC_output_directory, b, [FS_directory,'/', b, '/mri/orig.mgz'], [FS_directory,'/',b, '/mri/aparc+aseg.mgz']);
+end
+display(['Done with subject: ', b,': ',num2str(x-2), ' of ', num2str(size(a,1)-2)]);
+end
+
+Other helpful screen commands:
+a. Make a new screen window:
+     screen -S NameOfScreen
+b. Detach screen:
+     CNTRL+A followed by D
+c. To see your running screens:
+     screen -ls
+d. Attach screen:
+     screen -x NameOfScreen
+e. Exit screen:
+     exit
+

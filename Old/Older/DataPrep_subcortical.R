@@ -61,7 +61,7 @@ PanData <- dataMerge[which(dataMerge$PanTd == 1), ]
 
 write.csv(PanData, file="/data/joy/BBL/projects/enigmaAnxiety/subjectData/n690_anxiety_subCorticalVals_short_Pan.csv", row.names=F, quote=F)
 
-#Subset to just the panic group (n=14)
+#Subset to just the Td group (n=420)
 TdData <- dataMerge
 TdData <- dataMerge[which(dataMerge$PanTd == 0), ]
 

@@ -1,106 +1,189 @@
+########################################
+#### CURRENT ENIGMA ANXIETY PROJECTS ###
+########################################
+
+1. GAD (n=27) vs. TD (n=428)
+   a. cortical and subcortical (we sent a covariates file and raw T1 images)
+
+2. SAD (n=328) vs. TD (n=428)
+   a. subcortical (we sent a covariates file and LandRvolumes.csv)
+   b. cortical (project not started yet)
+
+3. Panic (n=14) vs. TD (n=428)
+   a. subcortical (ongoing?)
+
+4. Specific Phobia (n=426) vs. TD (n=428)
+   a. subcortical (starting soon)
+
+
+###############################
+#### NEW PROJECT INQUIRIES ####
+###############################
+
+1. New project inquiries typically come to the PIs and are forwarded to us (the postdocs). If an inquiry comes directly to you, you will need to get PI approval of our involvement from Ted and Raquel before proceeding. 
+   a. There are usually 3 options for project involvement:
+      a. We run the analyses ourselves and provide only summary statistics (no covariates files, LandRvolumes files, or raw data are given). 
+      b. We run cortical and/or subcortical segmentation, QA the data, and provide this data in an LandRvolumes file along with a covariates file.
+      	 a. Subcortical SAD currently falls under this category
+      c. We provide raw data files and a covariates file.
+      	 a. Cortical and subcortical GAD currently fall under this category
+2. New project collaborators typically ask for an excel with relevant info about our sample to plan their projects.
+   a. An example excel that has been filled out is "ENIGMA_ANX_overviewsites_final.xlsx"
+   b. Use the script "NewInquiry.R" to gather the information needed to fill out this excel. 
+
+
+###################################
+#### CREATING COVARIATES FILES ####
+###################################
+
+1. Use the script "DataPrepWithCovariates.R" to prep the subject-level data for the ENIGMA-Anxiety projects, including creating covariates files with the consortium requested variable names.
+   a. This has been done for GAD and SAD.
+   b. For new projects, copy the GAD or SAD section near the end of the script and replace GAD or SAD with the relevant anxiety disorder.
+2. The "DataPrepWithCovariates.R" will:   
+   a. Load the data files
+   b. Extract the relevant variables
+   c. Merge the files
+   d. Apply exclusions
+   e. Subset to only TD and those with the relevant anxiety diagnosis
+   f. Save a list of bblids and scanids for zipping files
+   g. Save the covariates file as a .csv file
+3. NOTE: Comorbidity is okay across anxiety diagnoses (subjects can be in more than one anxiety category).
+
+
+####################################
+#### ZIP RAW FILES FOR TRANSFER ####
+####################################
+
+1. The script "DataPrepWithCovariates.R" will create lists of bblids for zipping nifti files for transferring. 
+   a. This has been done for GAD and TD. 
+   b. NOTE: ENIGMA collaborators prefer the TD and anxiety patients to be compressed into separate files.
+2. Use the scripts "ZipFiles_GAD.sh" and "ZipFiles_TD.sh". These scripts will:
+   a. Create a list of paths to each subject's data
+   b. Zip the files into a .tar.gz file
+
+
+####################################
+#### TRANSFER FILES WITH GLOBUS ####
+####################################
+
+1. To transfer zipped raw data files, first be sure you have Ted and Raquel's approval.
+2. Download a Globus Personal account to your laptop
+   a. NOTE: You cannot upload to Globus through the UPenn firewall, even with a Globus Personal account (UPenn IT couldn't figure out how to get around this). 
+   b. Instead, you will need to use a fast, non-uphs internet connection, such as the UPenn guest wifi.
+3. Click on the Globus link provided from the site collaborator
+4. Click on the “Endpoints” tab on the left hand side menu
+5. Under the “Shared with you” tab, choose “ENIGMA Data transfer” (this name might differ by site - check with the site collaborator)
+6. If it doesn’t open automatically, choose “Open in File Manager”
+7. ENIGMA should be on the left side. On the right side, click on the empty “Collection” search bar.
+8. A new window will open. Go to the “Your Collections” tab and choose “BBL laptop” (or whatever name you created when you downloaded Globus Personal to your laptop).
+9. If nothing shows up, click on the “Path” empty search bar. It should then auto populate with “/~/“ and show the contents of your home/ mac folder
+10. Click on the file to upload and choose “Start”
+11. You will see a green message that says “Transfer request submitted successfully. Task id:” CNTRL-click on the task id to open a window that shows the status of the transfer. “Bytes transferred” only updates every minute or so. 
+12. When done uploading, go to “File Manager” and ENIGMA Data transfer to see the files uploaded.
+13. If needed, files can be deleted by clicking on the file name and choosing “delete selected”
+
+
 ################################
-#### ENIGMA ANXIETY projects ###
+#### SUBCORTICAL EXTRACTION ####
 ################################
 
-1. Panic (n=14) vs. TD 
-   a. subcortical (project ongoing)
+#This is a supplement to the "Instructions Freesurfer subcortical segmentation" document provided by Moji Aghajani (m.aghajani@vumc.nl) and Nynke Groenewold (nynke.groenewold@uct.ac.za) which has detailed steps.
 
-2. SAD (n=325) vs. TD
-   a. subcortical (other sites are aiming to finish QA in Feb 2018)
-   b. cortical (ETA: "much later in 2018")
-
-3. Specific Phobia (n=424) vs. TD
-   a. subcortical? (proposal received, no concrete plans yet)
-
-4. GAD (n=27) vs. TD
-   a. subcortical (starting "soon")
-
-
-##NOTES:
-#This README file is a supplement to the "Instructions Freesurfer subcortical segmentation" document provided by Moji Aghajani (m.aghajani@vumc.nl) and Nynke Groenewold (nynke.groenewold@uct.ac.za).
-#Comorbidity is okay across anxiety diagnoses (subjects can be in more than one anxiety category).
-
-
-###############
-#### STEPS ####
-###############
-
-1. Run "recon-all" in freesurfer (steps 1-3 in "Instructions Freesurfer subcortical segmentation" were skipped).
-   a. All PNC data (n=1601) was run through the recon-all freesurfer pipeline by Megan Quarmely and Lauren Beard.
+1. Run "recon-all" in freesurfer (steps 1-3 in "Instructions Freesurfer subcortical segmentation").
+   a. These steps can be skipped because all PNC data (n=1601) was run through the recon-all freesurfer pipeline by Megan Quarmely and reproduced by Lauren Beard.
    b. The directory for the freesurfer results is here: /data/joy/BBL/studies/pnc/processedData/structural/freesurfer53
 
-2. Run the script "DataPrep.R" which will:
-   a. Load the data files
-   b. Merge the files
-   c. Apply exclusions
-   d. Transform variables	
-   e. Make diagnosis factor variables (1=patient, 0=TD)
-   f. Subset to only TD and those with an anxiety diagnosis (anxiety=690, TD=420, total=1110)
-   g. Describe the sample in terms of comorbidities, med use, mean age, etc.
-   h. Save the subject level data file and a .csv of the bblids/scanids of the final 1110 sample
-   i. Subset the 1601 data to those under 18 to document samples sizes under 18 (just for the ENIGMA group's knowledge; analyses include all age ranges)
-   j. Calculate means, sds, percentage of females, percentage of White, and Ns for entire 1601 sample
-   k. Create and save a demographics table for the n1601 sample
+2. Extract the subcortical and ICV volume values (step 4 in "Instructions Freesurfer subcortical segmentation").
+   a. The script "DataPrepWithCovariates.R" will save a list of bblids and scanids for all anxiety patients and TD (n=1120).
+   b. Use this list of bblids in the script "ExtractSubcortVol.sh" to extract the subcortical and ICV volumes for each subject and save in LandRvolume.csv
+      
+3. Use the script "SubsetByDiag_beforeQA.R" to subset by each group (panic, social anxiety, GAD, specific phobia, and TD) and save each LandRvolumes.csv file in a separate folder.
+   a. This is done to create histograms for patients and controls separately in the next step.
 
-3. Extract subcortical volumes
-   a. Step 4 in the "Instructions Freesurfer subcortical segmentation" document was skipped because we already extracted the subcortical volume values for all subjects for previous ENIGMA projects.
-   b. Instead, use the script "PullSubcortValues.R" which will:
-      1. Read in and merge the subject level and volume data
-      2. Extract the bblids and datexscanids for the script "MoveDirUp.sh" (step 5b)
-      3. Pull the subcortical values for just the subjects we need for the ENIGMA Anxiety histograms
-      4. Rename the variables to match the "enigma_plots.R" script provided by the ENIGMA working group
-      5. Save the full n=1110 sample LandRvolumes.csv
-      6. Subset by each group (panic, social anxiety, GAD, specific phobia, and TD) and save each LandRvolumes.csv file in a separate folder (before QA or after???)
-
-4. Generate histogram plots (for detecting outliers)
+4. Generate histogram plots (for detecting outliers) and outlier log files (steps 5 and 6 in "Instructions Freesurfer subcortical segmentation")
    a. Use the script "enigma_plots.R" to generate the histograms 
-      1. Copy enigma_plots.R into /data/jux/BBL/studies/enigmaAnxiety/figures/all
+      1. Copy enigma_plots.R into /data/jux/BBL/projects/enigmaAnxiety/figures/AllAnxTd
       2. To run the script, cd to that folder and type:
       	 R --no-save --slave < enigma_plots.R
+      3. Do the same for Pan, Soc, Gad, Sph, and Td (ENIGMA collaborators want separate histograms for patients and controls)
    b. Use the script "outlier_LandRvolumes.R" to generate a log file that will tell you which subjects are outliers.
-      1. Copy outlier_LandRvolumes.R into /data/jux/BBL/studies/enigmaAnxiety/figures/all
+      1. Copy outlier_LandRvolumes.R into /data/jux/BBL/projects/enigmaAnxiety/figures/AllAnxTd
       2. Cd to that folder and type:
-      	 R --no-save --slave < outlier_LandRvolumes.R > outliers.log
+      	 R --no-save --slave < outlier_LandRvolumes.R > outliers.log  
+      3. Do the same for Pan, Soc, Gad, Sph, and Td
 
-5. Copy the data files from /data/joy/BBL/studies/pnc/processedData/structural/freesurfer53 to /data/jux/BBL/studies/enigmaAnxiety/SUBJECTDATA/freesurfer53
-   a. Use the script "CopyData.R"
-      1. Once copied, count the number of directories in a folder to make sure all files copied over: ls -1 |wc -l
-   b. Use the script "MoveDirUp.sh" which will: 
-      1. Move the 'mri' folder one directory up from {bblid}/{date}/mri to {bblid}/mri
-	 NOTE: This is done because we have to change the directory levels in order for the matlab script to create pngs for quality checking.  
-
-6. Create pngs for the quality check
-   a. Use the following procedure (otherwise, you will get errors about "crash dumps" because of too little memory)
+5. Create pngs for quality checking (step 7 in "Instructions Freesurfer subcortical segmentation")
+   a. Run the script "MakePngs.m" using the following procedure (otherwise, you will get errors about "crash dumps" because of too little memory)
       	  ssh -Y username
+	  ssh -Y compute-0-0 (just using qlogin without this command first does not work for some reason)
 	  screen -S enigmaAnxiety
 	  qlogin	
-	  cd /data/jux/BBL/studies/enigmaAnxiety/SUBJECTDATA/freesurfer53
+	  cd /data/jux/BBL/projects/enigmaAnxiety/scripts/enigmaAnxiety/
 	  matlab -nodisplay
-	  addpath /data/jux/BBL/studies/enigmaAnxiety/scripts/ENIGMA_QC
+          MakePngs
+   b. This creates 150 .png images for each subject in separate folders the QC/ directory. 
+      a. Note: the script "MakePngs.m" takes about 24 hours to run 1120 subjects. 
+   c. Some helpful screen commands:
+      a. Make a new screen window:
+	   screen -S NameOfScreen
+      b. Detach screen:
+	   CNTRL+A followed by D
+      c. To see your running screens:
+	   screen -ls
+      d. Attach screen:
+           screen -x NameOfScreen
+      e. Exit screen:
+	   exit
 
+6. Create html files that compile all the png images for easy viewing (step 8 in "Instructions Freesurfer subcortical segmentation")
+   a. Use the script "make_subcortical_ENIGMA_QC_webpage.sh"
+           cd /data/jux/BBL/projects/enigmaAnxiety/scripts/enigmaAnxiety/
+	   ./make_subcortical_ENIGMA_QC_webpage.sh /data/jux/BBL/projects/enigmaAnxiety/QC
 
+7. Set anyone previously flagged with bad Freesurfer data (originally determined by Megan Quarmely and reproduced by Lauren Beard) to NA.
+   a. Use the script "ExcludeFS.R" to do this for the LandRvolumes.csv using the variable fsFinalExclude.
 
-{SOPHIA TO UPDATE}
-QC_output_directory='/data/joy/BBL/projects/enigmaAnxiety/SUBJECTDATA/freesurfer53/QC/';
-FS_directory='/data/joy/BBL/projects/enigmaAnxiety/SUBJECTDATA/freesurfer53';
-a=dir(char(strcat(FS_directory,'/*')));%Choose this so that it selects only %your subject folders that contain FS output
-for x = 1:size(a,1)
-[c,b,d]=fileparts(a(x,1).name); %b becomes the subject_name
-try
-func_make_subcorticalFS_ENIGMA_QC(QC_output_directory, b, [FS_directory,'/', b, '/mri/orig.mgz'], [FS_directory,'/',b, '/mri/aparc+aseg.mgz']);
-end
-display(['Done with subject: ', b,': ',num2str(x-2), ' of ', num2str(size(a,1)-2)]);
-end
+8. Perform quality checks using the png images you created and exclude poor segmentations
+   a. Download the LandRvolumes.csv you just altered to your local environment so that you can open it with MS Excel. This will be saved in Mac/Users/{Your account name}
+         sftp {USERNAME}@chead.uphs.upenn.edu
+         cd /data/jux/BBL/projects/enigmaAnxiety/figures/AllAnxTd/fsFinalExclude
+         get LandRvolumes.csv 
+   b. Open LandRvolumes.csv in Excel.
+   c. Open the outlier log (/data/jux/BBL/projects/enigmaAnxiety/figures/AllAnxTd/outliers.log) with a text editor (emacs, gedit, etc).
+   d. Open the html webpage (created in step 6). Note: You need a fast internet connection to open these large html files.
+         ssh -Y compute-0-0
+         firefox /data/jux/BBL/projects/enigmaAnxiety/QC/ENIGMA_Subcortical_QC.html
+   e. Review outliers for each brain region. 
+      a. Use the "find" tool in firefox to easily navigate to the desired subject number in the html.
+      b. If the segmentation is poor, exclude it (change the value to 'NA' in LandRvolumes.csv).
+      c. See the pdf "Attachment1_ENIGMA_ANXIETY_Subcortical_Instructions_QC_Example_Segmentations.pdf" for examples of good and poor sementations.
+   f. Go through all html files to finish QA, saving the LandRvolumes.csv as you go. 
+   g. When you are done, upload LandRvolumes.csv to /data/jux/BBL/projects/enigmaAnxiety/figures/AllAnxTd_QA
+      a. NOTE: It must be saved as a .csv and not .xlsx
+         sftp {USERNAME}@chead.uphs.upenn.edu
+	 cd /data/jux/BBL/projects/enigmaAnxiety/figures/AllAnxTd_QA
+      	 put LandRvolumes.csv
+   h. We only need to do step 8 for the AllAnxTd LandRvolumes.csv since it contains the data for all possible anxiety projects. In the next step we will subset this QA'ed LandRvolumes.csv for individual projects.
 
-Other helpful screen commands:
-a. Make a new screen window:
-     screen -S NameOfScreen
-b. Detach screen:
-     CNTRL+A followed by D
-c. To see your running screens:
-     screen -ls
-d. Attach screen:
-     screen -x NameOfScreen
-e. Exit screen:
-     exit
+9. Use the script "SubsetByDiag_afterQA.R" to subset the final LandRvolumes.csv after QA by each group (panic, social anxiety, GAD, specific phobia, and TD).
 
+10. Rerun the histograms and summary stats on the QA'ed LandRvolumes.csv for AllAnxTd and each group separately
+   a. Copy enigma_plots.R into /data/jux/BBL/projects/enigmaAnxiety/figures/AllAnxTd_QA
+   b. To run the script, cd to that folder and type:
+         R --no-save --slave < enigma_plots.R
+   c. Do the same for Pan_QA, Soc_QA, Gad_QA, Sph_QA, and Td_QA
+   d. Look at the histograms before and after QA to confirm that QA did a good job. 
+
+11. Optional: Rerun the outlier script to see if anything is still coming up as an outlier
+   a. Copy outlier_LandRvolumes.R into /data/jux/BBL/projects/enigmaAnxiety/figures/AllAnxTd_QA
+   b. Cd to that folder and type:
+         R --no-save --slave < outlier_LandRvolumes.R > outliers.log
+   c. Do the same for Pan, Soc, Gad, Sph, and Td
+
+12. Send the QA'd data to the ENIGMA collaborator.
+   a. Zip the QA'd LandRvolumes.csv, updated histograms, and updated SummaryStats.txt for patients and controls separately:
+          cd /data/jux/BBL/projects/enigmaAnxiety/figures/Soc_QA
+          tar -cvzf PNC_SAD_LandRvolumes.tar.gz *.png SummaryStats.txt LandRvolumes.csv
+
+      	  cd /data/jux/BBL/projects/enigmaAnxiety/figures/Td_QA
+      	  tar -cvzf PNC_TD_LandRvolumes.tar.gz *.png SummaryStats.txt LandRvolumes.csv
